@@ -1,0 +1,442 @@
+<!BA Sales html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BA Sales Tracker</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7fafc;
+        }
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-2xl">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">BA Sales Tracker</h1>
+        <p class="text-center text-gray-600 mb-8">Please fill out the form to record daily sales information.</p>
+        <div id="userIdDisplay" class="text-center text-sm text-gray-500 mb-4"></div>
+
+        <form id="salesForm" class="space-y-6">
+            <!-- First Row: Date and Employee Name -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="date" class="block text-sm font-medium text-gray-700">Date</label>
+                    <input type="date" id="date" name="date" required class="mt-1 block w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="employeeName" class="block text-sm font-medium text-gray-700">Employee Name</label>
+                    <input type="text" id="employeeName" name="employeeName" required class="mt-1 block w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+            </div>
+
+            <!-- Second Row: Designation and Customer Name -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="designation" class="block text-sm font-medium text-gray-700">Designation</label>
+                    <select id="designation" name="designation" required class="mt-1 block w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Select Designation</option>
+                        <option value="BA">BA</option>
+                        <option value="Merchandiser">Merchandiser</option>
+                        <option value="Promoter">Promoter</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="customerName" class="block text-sm font-medium text-gray-700">Customer Name</label>
+                    <select id="customerName" name="customerName" required class="mt-1 block w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Select Customer</option>
+                        <option value="Reliance Smart">Reliance Smart</option>
+                        <option value="D-Mart">D-Mart</option>
+                        <option value="More Supermarket">More Supermarket</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Third Row: Store Code, Store Name, and Location -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label for="storeCode" class="block text-sm font-medium text-gray-700">Store Code</label>
+                    <input type="text" id="storeCode" name="storeCode" required class="mt-1 block w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="storeName" class="block text-sm font-medium text-gray-700">Store Name</label>
+                    <input type="text" id="storeName" name="storeName" required class="mt-1 block w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div>
+                    <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
+                    <input type="text" id="location" name="location" required class="mt-1 block w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+            </div>
+
+            <!-- Items Section -->
+            <div id="items-container" class="space-y-6">
+                <!-- Dynamically added item rows will go here -->
+            </div>
+
+            <div class="flex justify-center pt-4">
+                <button type="button" id="addItemBtn" class="w-full md:w-auto px-8 py-3 bg-indigo-600 text-white font-semibold rounded-full shadow-lg hover:bg-indigo-700 transition-colors duration-300">
+                    Add New Item
+                </button>
+            </div>
+
+            <!-- Submit Button and Download Button -->
+            <div class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4 pt-4">
+                <button type="submit" class="w-full md:w-auto px-8 py-3 bg-green-600 text-white font-semibold rounded-full shadow-lg hover:bg-green-700 transition-colors duration-300">Submit All Sales Data</button>
+                <button type="button" id="downloadBtn" class="w-full md:w-auto px-8 py-3 bg-blue-600 text-white font-semibold rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-300">Download as Excel</button>
+            </div>
+        </form>
+
+        <!-- Display Area for Data -->
+        <div class="mt-8 pt-8 border-t border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Submitted Sales Data</h2>
+            <div id="loading" class="text-center text-gray-500">Loading data...</div>
+            <div id="salesDataDisplay" class="space-y-4">
+                <!-- Data from Firestore will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Message box to replace alert() -->
+    <div id="messageBox" class="message-box hidden bg-white p-6 rounded-lg shadow-xl text-center">
+        <p id="messageText" class="text-gray-700 mb-4"></p>
+        <button id="messageCloseBtn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">OK</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, getDocs, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase configuration and initialization
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        setLogLevel('Debug');
+
+        const products = [
+            { name: "BELLA VITA PERFUM MAN GFTSET 4x20ml CBD", mrp: 649 },
+            { name: "BELLA VITA LUXURY ROSE WOMN EDP 100ml CBD", mrp: 599 },
+            { name: "BELLA VITA LUXURY IMPCT MAN EDC 100ml CBD", mrp: 599 },
+            { name: "BELLA VITA WHITE OUD PERFUME 100ml CBD", mrp: 599 },
+            { name: "BELLA VITA LXRY FRSH UNSEX EDT 100ml CBD", mrp: 599 },
+            { name: "BELLA VITA CEO MEN PERFUME 100ml CBD", mrp: 599 },
+            { name: "BELLA VITA LUX ORG GLM WMN EDP 190ml CBD", mrp: 599 },
+            { name: "BELLA VITA CEO MAN DEO 150ml CAN", mrp: 249 },
+            { name: "BELLA VITA SKAI AQUATIC DEO 150ml CAN", mrp: 249 },
+            { name: "BELLAVITA PERFUM GFTSET UNSX 4x20ml CBD", mrp: 649 },
+            { name: "BELLAVITA LXRYBDYPRFM IMPTMN DEO 150MLCAN", mrp: 299 },
+            { name: "BELLA VTA LXRY DMN MN DO BDY PRF 150MLCAN", mrp: 299 },
+            { name: "BELLA VITA PERFUM GFTSET HER 4x20ml CBD", mrp: 649 },
+            { name: "BELLA VITA LUXURY HONEY OUD EDP 100ml CBD", mrp: 599 },
+            { name: "BELLAVITA LXRY SKI AQUTC EDC 100ml CBD", mrp: 599 },
+            { name: "BELLA VITA LXRY GLM WMN BDY PRFM 150MLCAN", mrp: 499 },
+            { name: "BELLA VT LXRY BDY PRF CEO W DEO 150MLCAN", mrp: 299 },
+            { name: "BELLAVITA LUXURY OCEAN PERFUME 100ML", mrp: 899 },
+            { name: "BELLAVITA HOT MESS WOMAN PERFUME 100 ML", mrp: 899 },
+            { name: "BELLAVITA CEO MAN INTENSE PERFUME 100 ML", mrp: 899 },
+            { name: "BELLAVITA LUXURY GOLD OUD PERFUME 100 ML", mrp: 899 },
+            { name: "BELLAVITA LUXURY OUD EXPERIENCE 4x20 ML", mrp: 299 },
+            { name: "BELLAVITA DEO ROYALE LEGEND 150ML", mrp: 299 },
+            { name: "BELLAVITA DEO ROYALE GOLD DUST 150ML", mrp: 299 },
+            { name: "BELLAVITA DEO ROYALE VOYAGE 150ML", mrp: 299 },
+            { name: "BELLAVITA DEO ROYALE EVERGREEN 150ml", mrp: 299 },
+            { name: "BELLAVITA BLU MAN 100 ML", mrp: 899 },
+            { name: "BELLAVITA OCNMN PERFM 100ML", mrp: 899 },
+            { name: "BELLAVITA WHITE OUD DEO 150ML", mrp: 299 },
+            { name: "BELLAVITA IPL GAME UNSX BDY PRFM 150 ML", mrp: 299 },
+            { name: "BELLA VITA IPL SIN UNSX BDY PRFM 150 ML", mrp: 299 },
+            { name: "BELLAVITA DATE WOMAN PERFUM 100 ML", mrp: 899 },
+            { name: "BELLAVITA GIFT MEN OUD EXPRN 4x20ML CBD", mrp: 899 },
+            { name: "BELLAVITA GIFT MEN LUX CLLCTN 4x20ML CBD", mrp: 899 },
+            { name: "BELLAVITA SKAI AQUATIC SHOWER GEL 500 ML", mrp: 499 },
+            { name: "BELLAVITA WHITE OUD UNSEX SHOWERGEL 500ML", mrp: 499 },
+            { name: "BELLAVITA ORGANIC CHAKRA CLEANSE AURA B", mrp: 299 },
+            { name: "BELLAVITA LUXURY CEO MAN SHOWERGEL 500ML", mrp: 499 },
+            { name: "BELLAVITA KLUB MAN SHOWER GEL 500 ML", mrp: 499 },
+        ];
+
+        // UI Elements
+        const form = document.getElementById('salesForm');
+        const itemsContainer = document.getElementById('items-container');
+        const addItemBtn = document.getElementById('addItemBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const salesDataDisplay = document.getElementById('salesDataDisplay');
+        const loadingDiv = document.getElementById('loading');
+        const userIdDisplay = document.getElementById('userIdDisplay');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+        const messageCloseBtn = document.getElementById('messageCloseBtn');
+
+        // Authentication and Data Loading
+        let userId = null;
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                userIdDisplay.textContent = `Your User ID: ${userId}`;
+                // Set up the real-time listener for sales data
+                setupRealtimeListener();
+            } else {
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Authentication failed: ", error);
+                    showMessage("Authentication failed. Please check the console for details.");
+                }
+            }
+        });
+
+        // Functions for UI and logic
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.classList.remove('hidden');
+        }
+
+        messageCloseBtn.addEventListener('click', () => {
+            messageBox.classList.add('hidden');
+        });
+
+        function createItemRow() {
+            const itemRow = document.createElement('div');
+            itemRow.classList.add('item-row', 'bg-gray-50', 'p-6', 'rounded-lg', 'border', 'border-gray-200', 'shadow-sm', 'relative');
+            itemRow.innerHTML = `
+                <button type="button" class="remove-btn absolute top-2 right-2 text-gray-400 hover:text-red-500 transition-colors duration-300">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="itemName" class="block text-sm font-medium text-gray-700">Item Name</label>
+                        <select name="itemName" required class="mt-1 block w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 item-name-select">
+                            <option value="">Select an item...</option>
+                            ${products.map(p => `<option value="${p.name}">${p.name}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="mrp" class="block text-sm font-medium text-gray-700">MRP</label>
+                        <input type="number" name="mrp" readonly class="mt-1 block w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg shadow-sm focus:outline-none cursor-not-allowed mrp-input">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <div>
+                        <label for="openingStock" class="block text-sm font-medium text-gray-700">Opening Stock Qty</label>
+                        <input type="number" name="openingStock" required class="mt-1 block w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 opening-stock-input">
+                    </div>
+                    <div>
+                        <label for="soldQty" class="block text-sm font-medium text-gray-700">Sold Qty</label>
+                        <input type="number" name="soldQty" required class="mt-1 block w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sold-qty-input">
+                    </div>
+                    <div>
+                        <label for="closingStock" class="block text-sm font-medium text-gray-700">Closing Stock Qty</label>
+                        <input type="number" name="closingStock" readonly class="mt-1 block w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg shadow-sm focus:outline-none cursor-not-allowed closing-stock-input">
+                    </div>
+                </div>
+            `;
+            itemsContainer.appendChild(itemRow);
+
+            // Add event listeners to the new row
+            const itemNameSelect = itemRow.querySelector('.item-name-select');
+            const mrpInput = itemRow.querySelector('.mrp-input');
+            const openingStockInput = itemRow.querySelector('.opening-stock-input');
+            const soldQtyInput = itemRow.querySelector('.sold-qty-input');
+            const closingStockInput = itemRow.querySelector('.closing-stock-input');
+            const removeBtn = itemRow.querySelector('.remove-btn');
+
+            itemNameSelect.addEventListener('change', () => {
+                const selectedProduct = products.find(p => p.name === itemNameSelect.value);
+                mrpInput.value = selectedProduct ? selectedProduct.mrp : '';
+            });
+
+            const calculateClosingStock = () => {
+                const opening = parseInt(openingStockInput.value) || 0;
+                const sold = parseInt(soldQtyInput.value) || 0;
+                const closing = opening - sold;
+                closingStockInput.value = isNaN(closing) ? '' : closing;
+            };
+
+            openingStockInput.addEventListener('input', calculateClosingStock);
+            soldQtyInput.addEventListener('input', calculateClosingStock);
+            
+            removeBtn.addEventListener('click', () => {
+                itemsContainer.removeChild(itemRow);
+            });
+        }
+
+        // Add the initial item row
+        createItemRow();
+
+        // Add a new item row when the button is clicked
+        addItemBtn.addEventListener('click', createItemRow);
+
+        // Handle form submission to Firestore
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            if (!userId) {
+                showMessage("Authentication not ready. Please wait a moment and try again.");
+                return;
+            }
+
+            const staticData = {
+                date: document.getElementById('date').value,
+                employeeName: document.getElementById('employeeName').value,
+                designation: document.getElementById('designation').value,
+                customerName: document.getElementById('customerName').value,
+                storeCode: document.getElementById('storeCode').value,
+                storeName: document.getElementById('storeName').value,
+                location: document.getElementById('location').value,
+                submittedBy: userId,
+                timestamp: new Date()
+            };
+
+            const itemRows = document.querySelectorAll('.item-row');
+            const items = [];
+            itemRows.forEach(row => {
+                const itemName = row.querySelector('.item-name-select').value;
+                const mrp = row.querySelector('.mrp-input').value;
+                const openingStock = row.querySelector('.opening-stock-input').value;
+                const soldQty = row.querySelector('.sold-qty-input').value;
+                const closingStock = row.querySelector('.closing-stock-input').value;
+                
+                if (itemName && openingStock && soldQty && closingStock) {
+                    items.push({
+                        itemName,
+                        mrp: parseInt(mrp),
+                        openingStock: parseInt(openingStock),
+                        soldQty: parseInt(soldQty),
+                        closingStock: parseInt(closingStock)
+                    });
+                }
+            });
+
+            const salesData = {
+                ...staticData,
+                items
+            };
+
+            try {
+                const docRef = await addDoc(collection(db, `/artifacts/${appId}/public/data/sales_reports`), salesData);
+                console.log("Document written with ID: ", docRef.id);
+                showMessage("Sales data submitted successfully!");
+                form.reset(); // Reset form after successful submission
+                itemsContainer.innerHTML = ''; // Clear items
+                createItemRow(); // Add a new empty row
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                showMessage("An error occurred while submitting data. Please try again.");
+            }
+        });
+
+        // Set up real-time listener for the sales data
+        function setupRealtimeListener() {
+            const q = query(collection(db, `/artifacts/${appId}/public/data/sales_reports`));
+            const unsubscribe = onSnapshot(q, (querySnapshot) => {
+                loadingDiv.style.display = 'none';
+                salesDataDisplay.innerHTML = '';
+                if (querySnapshot.empty) {
+                    salesDataDisplay.innerHTML = '<p class="text-center text-gray-500">No sales data submitted yet.</p>';
+                    return;
+                }
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const salesCard = document.createElement('div');
+                    salesCard.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow', 'border', 'border-gray-200');
+                    salesCard.innerHTML = `
+                        <h3 class="font-bold text-lg text-gray-800 mb-2">${data.employeeName} (${data.storeName})</h3>
+                        <p class="text-sm text-gray-600"><strong>Date:</strong> ${data.date}</p>
+                        <p class="text-sm text-gray-600"><strong>Customer Name:</strong> ${data.customerName}</p>
+                        <p class="text-sm text-gray-600 mb-2"><strong>Location:</strong> ${data.location}</p>
+                        <hr class="my-2">
+                        <h4 class="font-semibold text-gray-700">Items Sold:</h4>
+                        <ul class="list-disc list-inside space-y-1 mt-2">
+                            ${data.items.map(item => `
+                                <li class="text-sm text-gray-600">
+                                    <span class="font-medium">${item.itemName}</span> - Sold: ${item.soldQty} |
+                                    Closing Stock: ${item.closingStock}
+                                </li>
+                            `).join('')}
+                        </ul>
+                        <p class="text-xs text-right text-gray-400 mt-2">Submitted by: ${data.submittedBy}</p>
+                    `;
+                    salesDataDisplay.prepend(salesCard);
+                });
+            }, (error) => {
+                console.error("Error fetching documents: ", error);
+                loadingDiv.textContent = "Error loading data.";
+            });
+        }
+
+        // Handle download button click
+        downloadBtn.addEventListener('click', async () => {
+            if (!userId) {
+                showMessage("Authentication not ready. Please wait a moment and try again.");
+                return;
+            }
+
+            try {
+                showMessage("Preparing download...");
+                const q = query(collection(db, `/artifacts/${appId}/public/data/sales_reports`));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    showMessage("No data to download.");
+                    return;
+                }
+
+                let csvContent = "Date,Employee Name,Designation,Customer Name,Store Code,Store Name,Location,Item Name,MRP,Opening Stock,Sold Qty,Closing Stock,Submitted By\n";
+                
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const baseData = [
+                        data.date,
+                        `"${data.employeeName}"`,
+                        data.designation,
+                        `"${data.customerName}"`,
+                        data.storeCode,
+                        `"${data.storeName}"`,
+                        `"${data.location}"`,
+                    ].map(field => field.toString().replace(/"/g, '""')).join(',');
+
+                    data.items.forEach(item => {
+                        csvContent += `${baseData},"${item.itemName.toString().replace(/"/g, '""')}",${item.mrp},${item.openingStock},${item.soldQty},${item.closingStock},${data.submittedBy}\n`;
+                    });
+                });
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", "sales_data.csv");
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showMessage("Download successful!");
+            } catch (e) {
+                console.error("Error downloading data: ", e);
+                showMessage("An error occurred during download. Please check the console.");
+            }
+        });
+
+    </script>
+</body>
+</html>
