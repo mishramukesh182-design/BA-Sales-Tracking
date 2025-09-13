@@ -57,11 +57,8 @@
                     <select id="customerName" name="customerName" required class="mt-1 block w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                         <option value="">Select Customer</option>
                         <option value="Reliance Smart">Reliance Smart</option>
-			<option value="Reliance FF">Reliance FF</option>
                         <option value="D-Mart">D-Mart</option>
-                        <option value="More Retail">More Retail</option>
-			<option value="Lulu">Lulu</option>
-			<option value="H&G"> H&G</option>
+                        <option value="More Supermarket">More Supermarket</option>
                     </select>
                 </div>
             </div>
@@ -238,6 +235,7 @@
         });
 
         function createItemRow() {
+            console.log("Creating new item row...");
             const itemRow = document.createElement('div');
             itemRow.classList.add('item-row', 'bg-gray-50', 'p-6', 'rounded-lg', 'border', 'border-gray-200', 'shadow-sm', 'relative');
             itemRow.innerHTML = `
@@ -304,15 +302,9 @@
             });
         }
 
-        // Add the initial item row only when the page content is fully loaded
-        document.addEventListener('DOMContentLoaded', () => {
-             createItemRow();
-        });
-
-
         // Add a new item row when the button is clicked
         addItemBtn.addEventListener('click', () => {
-            console.log("Add Item button clicked!"); // New console log to confirm click
+            console.log("Add Item button clicked!");
             createItemRow();
         });
 
@@ -486,6 +478,10 @@
                 showMessage("An error occurred during download. Please check the console.");
             }
         });
+        
+        // This is the key change. We now create the initial item row at the very end
+        // of the script's execution to ensure all variables and functions are ready.
+        createItemRow();
 
     </script>
 </body>
