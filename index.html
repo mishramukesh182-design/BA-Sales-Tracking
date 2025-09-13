@@ -80,7 +80,7 @@
                     </div>
                 </div>
                 <div class="flex justify-center pt-4">
-                    <button type="submit" id="nextBtn" class="w-full md:w-auto px-8 py-3 bg-indigo-600 text-white font-semibold rounded-full shadow-lg hover:bg-indigo-700 transition-colors duration-300">
+                    <button type="button" id="nextBtn" class="w-full md:w-auto px-8 py-3 bg-indigo-600 text-white font-semibold rounded-full shadow-lg hover:bg-indigo-700 transition-colors duration-300">
                         Continue to Sales
                     </button>
                 </div>
@@ -195,6 +195,7 @@
         const page1 = document.getElementById('page-1');
         const page2 = document.getElementById('page-2');
         const personalInfoForm = document.getElementById('personalInfoForm');
+        const nextBtn = document.getElementById('nextBtn'); // Renamed from submit button
         const salesForm = document.getElementById('salesForm');
         const itemsContainer = document.getElementById('items-container');
         const addItemBtn = document.getElementById('addItemBtn');
@@ -315,8 +316,13 @@
         });
 
         // Handle Page 1 to Page 2 transition
-        personalInfoForm.addEventListener('submit', function(event) {
-            event.preventDefault();
+        nextBtn.addEventListener('click', function(event) {
+            // Check if the form is valid before transitioning
+            if (!personalInfoForm.checkValidity()) {
+                personalInfoForm.reportValidity();
+                return;
+            }
+            
             // Store personal info data
             personalInfoData = {
                 date: document.getElementById('date').value,
