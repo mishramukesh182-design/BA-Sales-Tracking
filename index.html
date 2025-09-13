@@ -115,7 +115,7 @@
     </div>
 
     <!-- Message box to replace alert() -->
-    <div id="messageBox" class="message-box hidden bg-white p-6 rounded-lg shadow-xl text-center">
+    <div id="messageBox" class="message-box bg-white p-6 rounded-lg shadow-xl text-center">
         <p id="messageText" class="text-gray-700 mb-4"></p>
         <button id="messageCloseBtn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">OK</button>
     </div>
@@ -173,11 +173,9 @@
         const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        setLogLevel('Debug');
-
+        let db, auth;
+        let userId = null;
+        let allSalesData = [];
 
         // UI Elements
         const form = document.getElementById('salesForm');
@@ -191,40 +189,7 @@
         const messageText = document.getElementById('messageText');
         const messageCloseBtn = document.getElementById('messageCloseBtn');
         const filterInput = document.getElementById('filterInput');
-
-        // Authentication and Data Loading
-        let userId = null;
-        let allSalesData = []; // Store all data in memory for filtering
-
-        // Use a function to handle authentication
-        const handleAuth = async () => {
-            try {
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (error) {
-                console.error("Authentication failed: ", error);
-                showMessage("Authentication failed. Please check the console for details.");
-            }
-        };
-
-        // Set up auth state change listener
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                userId = user.uid;
-                userIdDisplay.textContent = `Your User ID: ${userId}`;
-                // Set up the real-time listener for sales data
-                setupRealtimeListener();
-            } else {
-                userId = null;
-                // If not signed in, try to authenticate
-                handleAuth();
-            }
-        });
-
-
+        
         // Functions for UI and logic
         function showMessage(message) {
             messageText.textContent = message;
@@ -268,7 +233,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="itemName" class="block text-sm font-medium text-gray-700">Item Name</label>
-                        <div class="mt-1">${itemNameSelect.outerHTML}</div>
+                        <div class="mt-1"></div>
                     </div>
                     <div>
                         <label for="mrp" class="block text-sm font-medium text-gray-700">MRP</label>
@@ -290,6 +255,8 @@
                     </div>
                 </div>
             `;
+            // Manually insert the created select element
+            itemRow.querySelector('div.mt-1').appendChild(itemNameSelect);
             itemsContainer.appendChild(itemRow);
 
             // Add event listeners to the new row
@@ -418,14 +385,18 @@
         // Set up real-time listener for the sales data
         function setupRealtimeListener() {
             const q = query(collection(db, `/artifacts/${appId}/public/data/sales_reports`));
-            const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            onSnapshot(q, (querySnapshot) => {
                 loadingDiv.style.display = 'none';
                 allSalesData = [];
                 querySnapshot.forEach((doc) => {
                     allSalesData.push(doc.data());
                 });
                 // Sort the data in descending order by timestamp
-                allSalesData.sort((a, b) => b.timestamp.toMillis() - a.timestamp.toMillis());
+                allSalesData.sort((a, b) => {
+                    const aTimestamp = a.timestamp ? a.timestamp.toMillis() : 0;
+                    const bTimestamp = b.timestamp ? b.timestamp.toMillis() : 0;
+                    return bTimestamp - aTimestamp;
+                });
                 renderSalesData(allSalesData);
             }, (error) => {
                 console.error("Error fetching documents: ", error);
@@ -475,9 +446,11 @@
                         `"${data.location}"`,
                     ].map(field => field.toString().replace(/"/g, '""')).join(',');
 
-                    data.items.forEach(item => {
-                        csvContent += `${baseData},"${item.itemName.toString().replace(/"/g, '""')}",${item.mrp},${item.openingStock},${item.soldQty},${item.closingStock},${data.submittedBy}\n`;
-                    });
+                    if (data.items && Array.isArray(data.items)) {
+                         data.items.forEach(item => {
+                            csvContent += `${baseData},"${item.itemName.toString().replace(/"/g, '""')}",${item.mrp},${item.openingStock},${item.soldQty},${item.closingStock},${data.submittedBy}\n`;
+                        });
+                    }
                 });
 
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -496,10 +469,56 @@
             }
         });
         
-        // Ensure the initial item row is created immediately after the script loads
-        // and all functions/variables are defined.
-        createItemRow();
+        // --- Core App Initialization Logic ---
+        async function initializeAppAndListeners() {
+            try {
+                // Initialize Firebase
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('Debug');
 
+                // Sign in the user
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // Wait for auth state change
+                return new Promise((resolve, reject) => {
+                    const unsubscribe = onAuthStateChanged(auth, (user) => {
+                        if (user) {
+                            userId = user.uid;
+                            userIdDisplay.textContent = `Your User ID: ${userId}`;
+                            unsubscribe(); // Stop listening after first authentication
+                            resolve();
+                        } else {
+                            // This part handles the initial sign-in. If sign-in failed, reject
+                            reject(new Error("Firebase authentication failed."));
+                        }
+                    });
+                });
+
+            } catch (error) {
+                console.error("Failed to initialize app: ", error);
+                showMessage("App failed to initialize. Please check the console for details.");
+                // Return a rejected promise to stop further execution
+                return Promise.reject(error);
+            }
+        }
+
+        // Start the app
+        initializeAppAndListeners()
+            .then(() => {
+                console.log("App initialized. Setting up listeners and form.");
+                setupRealtimeListener();
+                createItemRow();
+            })
+            .catch(error => {
+                console.error("App setup halted due to an error.", error);
+                // The error message has already been shown by initializeAppAndListeners
+            });
     </script>
 </body>
 </html>
