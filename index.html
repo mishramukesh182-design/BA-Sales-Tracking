@@ -173,9 +173,10 @@
         const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        let db, auth;
-        let userId = null;
-        let allSalesData = [];
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        setLogLevel('Debug');
 
         // UI Elements
         const form = document.getElementById('salesForm');
@@ -190,6 +191,9 @@
         const messageCloseBtn = document.getElementById('messageCloseBtn');
         const filterInput = document.getElementById('filterInput');
         
+        let userId = null;
+        let allSalesData = [];
+
         // Functions for UI and logic
         function showMessage(message) {
             messageText.textContent = message;
@@ -470,55 +474,33 @@
         });
         
         // --- Core App Initialization Logic ---
-        async function initializeAppAndListeners() {
-            try {
-                // Initialize Firebase
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                setLogLevel('Debug');
-
-                // Sign in the user
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    await signInAnonymously(auth);
-                }
-
-                // Wait for auth state change
-                return new Promise((resolve, reject) => {
-                    const unsubscribe = onAuthStateChanged(auth, (user) => {
-                        if (user) {
-                            userId = user.uid;
-                            userIdDisplay.textContent = `Your User ID: ${userId}`;
-                            unsubscribe(); // Stop listening after first authentication
-                            resolve();
-                        } else {
-                            // This part handles the initial sign-in. If sign-in failed, reject
-                            reject(new Error("Firebase authentication failed."));
-                        }
-                    });
-                });
-
-            } catch (error) {
-                console.error("Failed to initialize app: ", error);
-                showMessage("App failed to initialize. Please check the console for details.");
-                // Return a rejected promise to stop further execution
-                return Promise.reject(error);
-            }
-        }
-
-        // Start the app
-        initializeAppAndListeners()
-            .then(() => {
-                console.log("App initialized. Setting up listeners and form.");
+        // 1. Authenticate the user. The onAuthStateChanged listener will handle
+        //    setting the user ID and starting the data listener.
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // User is signed in.
+                userId = user.uid;
+                userIdDisplay.textContent = `Your User ID: ${userId}`;
+                // Now that we have a user, start the real-time data listener
                 setupRealtimeListener();
-                createItemRow();
-            })
-            .catch(error => {
-                console.error("App setup halted due to an error.", error);
-                // The error message has already been shown by initializeAppAndListeners
-            });
+            } else {
+                // User is signed out, or a new user needs to be authenticated.
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Authentication failed: ", error);
+                    showMessage("Authentication failed. Check the console for more details.");
+                }
+            }
+        });
+
+        // 2. Immediately render the first item row. This part of the form
+        //    doesn't depend on the database, so it should appear instantly.
+        createItemRow();
     </script>
 </body>
 </html>
