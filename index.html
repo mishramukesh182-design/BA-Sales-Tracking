@@ -18,6 +18,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 100;
+            display: none;
         }
     </style>
 </head>
@@ -227,17 +228,37 @@
         // Functions for UI and logic
         function showMessage(message) {
             messageText.textContent = message;
-            messageBox.classList.remove('hidden');
+            messageBox.style.display = 'block';
         }
 
         messageCloseBtn.addEventListener('click', () => {
-            messageBox.classList.add('hidden');
+            messageBox.style.display = 'none';
         });
 
         function createItemRow() {
             console.log("Creating new item row...");
             const itemRow = document.createElement('div');
             itemRow.classList.add('item-row', 'bg-gray-50', 'p-6', 'rounded-lg', 'border', 'border-gray-200', 'shadow-sm', 'relative');
+            
+            // Item Name Select
+            const itemNameSelect = document.createElement('select');
+            itemNameSelect.name = 'itemName';
+            itemNameSelect.required = true;
+            itemNameSelect.classList.add('mt-1', 'block', 'w-full', 'px-4', 'py-2', 'bg-white', 'border', 'border-gray-300', 'rounded-lg', 'shadow-sm', 'focus:outline-none', 'focus:ring-indigo-500', 'focus:border-indigo-500', 'item-name-select');
+            
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Select an item...';
+            itemNameSelect.appendChild(defaultOption);
+            
+            products.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.name;
+                option.textContent = p.name;
+                itemNameSelect.appendChild(option);
+            });
+            
+            // The rest of the HTML structure
             itemRow.innerHTML = `
                 <button type="button" class="remove-btn absolute top-2 right-2 text-gray-400 hover:text-red-500 transition-colors duration-300">
                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -247,10 +268,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="itemName" class="block text-sm font-medium text-gray-700">Item Name</label>
-                        <select name="itemName" required class="mt-1 block w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 item-name-select">
-                            <option value="">Select an item...</option>
-                            ${products.map(p => `<option value="${p.name}">${p.name}</option>`).join('')}
-                        </select>
+                        <div class="mt-1">${itemNameSelect.outerHTML}</div>
                     </div>
                     <div>
                         <label for="mrp" class="block text-sm font-medium text-gray-700">MRP</label>
@@ -275,15 +293,15 @@
             itemsContainer.appendChild(itemRow);
 
             // Add event listeners to the new row
-            const itemNameSelect = itemRow.querySelector('.item-name-select');
+            const newSelect = itemRow.querySelector('.item-name-select');
             const mrpInput = itemRow.querySelector('.mrp-input');
             const openingStockInput = itemRow.querySelector('.opening-stock-input');
             const soldQtyInput = itemRow.querySelector('.sold-qty-input');
             const closingStockInput = itemRow.querySelector('.closing-stock-input');
             const removeBtn = itemRow.querySelector('.remove-btn');
 
-            itemNameSelect.addEventListener('change', () => {
-                const selectedProduct = products.find(p => p.name === itemNameSelect.value);
+            newSelect.addEventListener('change', () => {
+                const selectedProduct = products.find(p => p.name === newSelect.value);
                 mrpInput.value = selectedProduct ? selectedProduct.mrp : '';
             });
 
@@ -304,7 +322,6 @@
 
         // Add a new item row when the button is clicked
         addItemBtn.addEventListener('click', () => {
-            console.log("Add Item button clicked!");
             createItemRow();
         });
 
@@ -412,7 +429,7 @@
                 renderSalesData(allSalesData);
             }, (error) => {
                 console.error("Error fetching documents: ", error);
-                loadingDiv.textContent = "Error loading data.";
+                loadingDiv.textContent = "Error loading data. Check console for details.";
             });
         }
         
@@ -479,8 +496,8 @@
             }
         });
         
-        // This is the key change. We now create the initial item row at the very end
-        // of the script's execution to ensure all variables and functions are ready.
+        // Ensure the initial item row is created immediately after the script loads
+        // and all functions/variables are defined.
         createItemRow();
 
     </script>
