@@ -125,385 +125,382 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, getDocs, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        document.addEventListener('DOMContentLoaded', () => {
+        // IMPORTANT: The products list must be at the top of the script
+        const products = [
+            { name: "BELLA VITA PERFUM MAN GFTSET 4x20ml CBD", mrp: 649 },
+            { name: "BELLA VITA LUXURY ROSE WOMN EDP 100ml CBD", mrp: 599 },
+            { name: "BELLA VITA LUXURY IMPCT MAN EDC 100ml CBD", mrp: 599 },
+            { name: "BELLA VITA WHITE OUD PERFUME 100ml CBD", mrp: 599 },
+            { name: "BELLA VITA LXRY FRSH UNSEX EDT 100ml CBD", mrp: 599 },
+            { name: "BELLA VITA CEO MEN PERFUME 100ml CBD", mrp: 599 },
+            { name: "BELLA VITA LUX ORG GLM WMN EDP 190ml CBD", mrp: 599 },
+            { name: "BELLA VITA CEO MAN DEO 150ml CAN", mrp: 249 },
+            { name: "BELLA VITA SKAI AQUATIC DEO 150ml CAN", mrp: 249 },
+            { name: "BELLAVITA PERFUM GFTSET UNSX 4x20ml CBD", mrp: 649 },
+            { name: "BELLAVITA LXRYBDYPRFM IMPTMN DEO 150MLCAN", mrp: 299 },
+            { name: "BELLA VTA LXRY DMN MN DO BDY PRF 150MLCAN", mrp: 299 },
+            { name: "BELLA VITA PERFUM GFTSET HER 4x20ml CBD", mrp: 649 },
+            { name: "BELLA VITA LUXURY HONEY OUD EDP 100ml CBD", mrp: 599 },
+            { name: "BELLAVITA LXRY SKI AQUTC EDC 100ml CBD", mrp: 599 },
+            { name: "BELLA VITA LXRY GLM WMN BDY PRFM 150MLCAN", mrp: 499 },
+            { name: "BELLA VT LXRY BDY PRF CEO W DEO 150MLCAN", mrp: 299 },
+            { name: "BELLAVITA LUXURY OCEAN PERFUME 100ML", mrp: 899 },
+            { name: "BELLAVITA HOT MESS WOMAN PERFUME 100 ML", mrp: 899 },
+            { name: "BELLAVITA CEO MAN INTENSE PERFUME 100 ML", mrp: 899 },
+            { name: "BELLAVITA LUXURY GOLD OUD PERFUME 100 ML", mrp: 899 },
+            { name: "BELLAVITA LUXURY OUD EXPERIENCE 4x20 ML", mrp: 299 },
+            { name: "BELLAVITA DEO ROYALE LEGEND 150ML", mrp: 299 },
+            { name: "BELLAVITA DEO ROYALE GOLD DUST 150ML", mrp: 299 },
+            { name: "BELLAVITA DEO ROYALE VOYAGE 150ML", mrp: 299 },
+            { name: "BELLAVITA DEO ROYALE EVERGREEN 150ml", mrp: 299 },
+            { name: "BELLAVITA BLU MAN 100 ML", mrp: 899 },
+            { name: "BELLAVITA OCNMN PERFM 100ML", mrp: 899 },
+            { name: "BELLAVITA WHITE OUD DEO 150ML", mrp: 299 },
+            { name: "BELLAVITA IPL GAME UNSX BDY PRFM 150 ML", mrp: 299 },
+            { name: "BELLA VITA IPL SIN UNSX BDY PRFM 150 ML", mrp: 299 },
+            { name: "BELLAVITA DATE WOMAN PERFUM 100 ML", mrp: 899 },
+            { name: "BELLAVITA GIFT MEN OUD EXPRN 4x20ML CBD", mrp: 899 },
+            { name: "BELLAVITA GIFT MEN LUX CLLCTN 4x20ML CBD", mrp: 899 },
+            { name: "BELLAVITA SKAI AQUATIC SHOWER GEL 500 ML", mrp: 499 },
+            { name: "BELLAVITA WHITE OUD UNSEX SHOWERGEL 500ML", mrp: 499 },
+            { name: "BELLAVITA ORGANIC CHAKRA CLEANSE AURA B", mrp: 299 },
+            { name: "BELLAVITA LUXURY CEO MAN SHOWERGEL 500ML", mrp: 499 },
+            { name: "BELLAVITA KLUB MAN SHOWER GEL 500 ML", mrp: 499 }
+        ];
 
-            // IMPORTANT: The products list must be at the top of the script
-            const products = [
-                { name: "BELLA VITA PERFUM MAN GFTSET 4x20ml CBD", mrp: 649 },
-                { name: "BELLA VITA LUXURY ROSE WOMN EDP 100ml CBD", mrp: 599 },
-                { name: "BELLA VITA LUXURY IMPCT MAN EDC 100ml CBD", mrp: 599 },
-                { name: "BELLA VITA WHITE OUD PERFUME 100ml CBD", mrp: 599 },
-                { name: "BELLA VITA LXRY FRSH UNSEX EDT 100ml CBD", mrp: 599 },
-                { name: "BELLA VITA CEO MEN PERFUME 100ml CBD", mrp: 599 },
-                { name: "BELLA VITA LUX ORG GLM WMN EDP 190ml CBD", mrp: 599 },
-                { name: "BELLA VITA CEO MAN DEO 150ml CAN", mrp: 249 },
-                { name: "BELLA VITA SKAI AQUATIC DEO 150ml CAN", mrp: 249 },
-                { name: "BELLAVITA PERFUM GFTSET UNSX 4x20ml CBD", mrp: 649 },
-                { name: "BELLAVITA LXRYBDYPRFM IMPTMN DEO 150MLCAN", mrp: 299 },
-                { name: "BELLA VTA LXRY DMN MN DO BDY PRF 150MLCAN", mrp: 299 },
-                { name: "BELLA VITA PERFUM GFTSET HER 4x20ml CBD", mrp: 649 },
-                { name: "BELLA VITA LUXURY HONEY OUD EDP 100ml CBD", mrp: 599 },
-                { name: "BELLAVITA LXRY SKI AQUTC EDC 100ml CBD", mrp: 599 },
-                { name: "BELLA VITA LXRY GLM WMN BDY PRFM 150MLCAN", mrp: 499 },
-                { name: "BELLA VT LXRY BDY PRF CEO W DEO 150MLCAN", mrp: 299 },
-                { name: "BELLAVITA LUXURY OCEAN PERFUME 100ML", mrp: 899 },
-                { name: "BELLAVITA HOT MESS WOMAN PERFUME 100 ML", mrp: 899 },
-                { name: "BELLAVITA CEO MAN INTENSE PERFUME 100 ML", mrp: 899 },
-                { name: "BELLAVITA LUXURY GOLD OUD PERFUME 100 ML", mrp: 899 },
-                { name: "BELLAVITA LUXURY OUD EXPERIENCE 4x20 ML", mrp: 299 },
-                { name: "BELLAVITA DEO ROYALE LEGEND 150ML", mrp: 299 },
-                { name: "BELLAVITA DEO ROYALE GOLD DUST 150ML", mrp: 299 },
-                { name: "BELLAVITA DEO ROYALE VOYAGE 150ML", mrp: 299 },
-                { name: "BELLAVITA DEO ROYALE EVERGREEN 150ml", mrp: 299 },
-                { name: "BELLAVITA BLU MAN 100 ML", mrp: 899 },
-                { name: "BELLAVITA OCNMN PERFM 100ML", mrp: 899 },
-                { name: "BELLAVITA WHITE OUD DEO 150ML", mrp: 299 },
-                { name: "BELLAVITA IPL GAME UNSX BDY PRFM 150 ML", mrp: 299 },
-                { name: "BELLA VITA IPL SIN UNSX BDY PRFM 150 ML", mrp: 299 },
-                { name: "BELLAVITA DATE WOMAN PERFUM 100 ML", mrp: 899 },
-                { name: "BELLAVITA GIFT MEN OUD EXPRN 4x20ML CBD", mrp: 899 },
-                { name: "BELLAVITA GIFT MEN LUX CLLCTN 4x20ML CBD", mrp: 899 },
-                { name: "BELLAVITA SKAI AQUATIC SHOWER GEL 500 ML", mrp: 499 },
-                { name: "BELLAVITA WHITE OUD UNSEX SHOWERGEL 500ML", mrp: 499 },
-                { name: "BELLAVITA ORGANIC CHAKRA CLEANSE AURA B", mrp: 299 },
-                { name: "BELLAVITA LUXURY CEO MAN SHOWERGEL 500ML", mrp: 499 },
-                { name: "BELLAVITA KLUB MAN SHOWER GEL 500 ML", mrp: 499 }
-            ];
+        // Firebase configuration and initialization
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-            // Firebase configuration and initialization
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-            const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        setLogLevel('Debug');
 
-            const app = initializeApp(firebaseConfig);
-            const db = getFirestore(app);
-            const auth = getAuth(app);
-            setLogLevel('Debug');
+        // UI Elements
+        const form = document.getElementById('salesForm');
+        const itemsContainer = document.getElementById('items-container');
+        const addItemBtn = document.getElementById('addItemBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const salesDataDisplay = document.getElementById('salesDataDisplay');
+        const loadingDiv = document.getElementById('loading');
+        const userIdDisplay = document.getElementById('userIdDisplay');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+        const messageCloseBtn = document.getElementById('messageCloseBtn');
+        const filterInput = document.getElementById('filterInput');
+        
+        let userId = null;
+        let allSalesData = [];
 
-            // UI Elements
-            const form = document.getElementById('salesForm');
-            const itemsContainer = document.getElementById('items-container');
-            const addItemBtn = document.getElementById('addItemBtn');
-            const downloadBtn = document.getElementById('downloadBtn');
-            const salesDataDisplay = document.getElementById('salesDataDisplay');
-            const loadingDiv = document.getElementById('loading');
-            const userIdDisplay = document.getElementById('userIdDisplay');
-            const messageBox = document.getElementById('messageBox');
-            const messageText = document.getElementById('messageText');
-            const messageCloseBtn = document.getElementById('messageCloseBtn');
-            const filterInput = document.getElementById('filterInput');
+        // Functions for UI and logic
+        function showMessage(message) {
+            messageText.textContent = message;
+            messageBox.style.display = 'block';
+        }
+
+        messageCloseBtn.addEventListener('click', () => {
+            messageBox.style.display = 'none';
+        });
+
+        function createItemRow() {
+            console.log("Creating new item row...");
+            const itemRow = document.createElement('div');
+            itemRow.classList.add('item-row', 'bg-gray-50', 'p-6', 'rounded-lg', 'border', 'border-gray-200', 'shadow-sm', 'relative');
             
-            let userId = null;
-            let allSalesData = [];
+            // Item Name Select
+            const itemNameSelect = document.createElement('select');
+            itemNameSelect.name = 'itemName';
+            itemNameSelect.required = true;
+            itemNameSelect.classList.add('mt-1', 'block', 'w-full', 'px-4', 'py-2', 'bg-white', 'border', 'border-gray-300', 'rounded-lg', 'shadow-sm', 'focus:outline-none', 'focus:ring-indigo-500', 'focus:border-indigo-500', 'item-name-select');
+            
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Select an item...';
+            itemNameSelect.appendChild(defaultOption);
+            
+            products.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.name;
+                option.textContent = p.name;
+                itemNameSelect.appendChild(option);
+            });
+            
+            // The rest of the HTML structure
+            itemRow.innerHTML = `
+                <button type="button" class="remove-btn absolute top-2 right-2 text-gray-400 hover:text-red-500 transition-colors duration-300">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="itemName" class="block text-sm font-medium text-gray-700">Item Name</label>
+                        <div class="mt-1"></div>
+                    </div>
+                    <div>
+                        <label for="mrp" class="block text-sm font-medium text-gray-700">MRP</label>
+                        <input type="number" name="mrp" readonly class="mt-1 block w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg shadow-sm focus:outline-none cursor-not-allowed mrp-input">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                    <div>
+                        <label for="openingStock" class="block text-sm font-medium text-gray-700">Opening Stock Qty</label>
+                        <input type="number" name="openingStock" required class="mt-1 block w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 opening-stock-input">
+                    </div>
+                    <div>
+                        <label for="soldQty" class="block text-sm font-medium text-gray-700">Sold Qty</label>
+                        <input type="number" name="soldQty" required class="mt-1 block w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sold-qty-input">
+                    </div>
+                    <div>
+                        <label for="closingStock" class="block text-sm font-medium text-gray-700">Closing Stock Qty</label>
+                        <input type="number" name="closingStock" readonly class="mt-1 block w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg shadow-sm focus:outline-none cursor-not-allowed closing-stock-input">
+                    </div>
+                </div>
+            `;
+            // Manually insert the created select element
+            itemRow.querySelector('div.mt-1').appendChild(itemNameSelect);
+            itemsContainer.appendChild(itemRow);
 
-            // Functions for UI and logic
-            function showMessage(message) {
-                messageText.textContent = message;
-                messageBox.style.display = 'block';
-            }
+            // Add event listeners to the new row
+            const newSelect = itemRow.querySelector('.item-name-select');
+            const mrpInput = itemRow.querySelector('.mrp-input');
+            const openingStockInput = itemRow.querySelector('.opening-stock-input');
+            const soldQtyInput = itemRow.querySelector('.sold-qty-input');
+            const closingStockInput = itemRow.querySelector('.closing-stock-input');
+            const removeBtn = itemRow.querySelector('.remove-btn');
 
-            messageCloseBtn.addEventListener('click', () => {
-                messageBox.style.display = 'none';
+            newSelect.addEventListener('change', () => {
+                const selectedProduct = products.find(p => p.name === newSelect.value);
+                mrpInput.value = selectedProduct ? selectedProduct.mrp : '';
             });
 
-            function createItemRow() {
-                console.log("Creating new item row...");
-                const itemRow = document.createElement('div');
-                itemRow.classList.add('item-row', 'bg-gray-50', 'p-6', 'rounded-lg', 'border', 'border-gray-200', 'shadow-sm', 'relative');
+            const calculateClosingStock = () => {
+                const opening = parseInt(openingStockInput.value) || 0;
+                const sold = parseInt(soldQtyInput.value) || 0;
+                const closing = opening - sold;
+                closingStockInput.value = isNaN(closing) ? '' : closing;
+            };
+
+            openingStockInput.addEventListener('input', calculateClosingStock);
+            soldQtyInput.addEventListener('input', calculateClosingStock);
+            
+            removeBtn.addEventListener('click', () => {
+                itemsContainer.removeChild(itemRow);
+            });
+        }
+
+        // Add a new item row when the button is clicked
+        addItemBtn.addEventListener('click', () => {
+            createItemRow();
+        });
+
+        // Handle form submission to Firestore
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            if (!userId) {
+                showMessage("Authentication not ready. Please wait a moment and try again.");
+                return;
+            }
+
+            const staticData = {
+                date: document.getElementById('date').value,
+                employeeName: document.getElementById('employeeName').value,
+                designation: document.getElementById('designation').value,
+                customerName: document.getElementById('customerName').value,
+                storeCode: document.getElementById('storeCode').value,
+                storeName: document.getElementById('storeName').value,
+                location: document.getElementById('location').value,
+                submittedBy: userId,
+                timestamp: new Date()
+            };
+
+            const itemRows = document.querySelectorAll('.item-row');
+            const items = [];
+            itemRows.forEach(row => {
+                const itemName = row.querySelector('.item-name-select').value;
+                const mrp = row.querySelector('.mrp-input').value;
+                const openingStock = row.querySelector('.opening-stock-input').value;
+                const soldQty = row.querySelector('.sold-qty-input').value;
+                const closingStock = row.querySelector('.closing-stock-input').value;
                 
-                // Item Name Select
-                const itemNameSelect = document.createElement('select');
-                itemNameSelect.name = 'itemName';
-                itemNameSelect.required = true;
-                itemNameSelect.classList.add('mt-1', 'block', 'w-full', 'px-4', 'py-2', 'bg-white', 'border', 'border-gray-300', 'rounded-lg', 'shadow-sm', 'focus:outline-none', 'focus:ring-indigo-500', 'focus:border-indigo-500', 'item-name-select');
-                
-                const defaultOption = document.createElement('option');
-                defaultOption.value = '';
-                defaultOption.textContent = 'Select an item...';
-                itemNameSelect.appendChild(defaultOption);
-                
-                products.forEach(p => {
-                    const option = document.createElement('option');
-                    option.value = p.name;
-                    option.textContent = p.name;
-                    itemNameSelect.appendChild(option);
-                });
-                
-                // The rest of the HTML structure
-                itemRow.innerHTML = `
-                    <button type="button" class="remove-btn absolute top-2 right-2 text-gray-400 hover:text-red-500 transition-colors duration-300">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                        </svg>
-                    </button>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="itemName" class="block text-sm font-medium text-gray-700">Item Name</label>
-                            <div class="mt-1"></div>
-                        </div>
-                        <div>
-                            <label for="mrp" class="block text-sm font-medium text-gray-700">MRP</label>
-                            <input type="number" name="mrp" readonly class="mt-1 block w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg shadow-sm focus:outline-none cursor-not-allowed mrp-input">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                        <div>
-                            <label for="openingStock" class="block text-sm font-medium text-gray-700">Opening Stock Qty</label>
-                            <input type="number" name="openingStock" required class="mt-1 block w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 opening-stock-input">
-                        </div>
-                        <div>
-                            <label for="soldQty" class="block text-sm font-medium text-gray-700">Sold Qty</label>
-                            <input type="number" name="soldQty" required class="mt-1 block w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sold-qty-input">
-                        </div>
-                        <div>
-                            <label for="closingStock" class="block text-sm font-medium text-gray-700">Closing Stock Qty</label>
-                            <input type="number" name="closingStock" readonly class="mt-1 block w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-lg shadow-sm focus:outline-none cursor-not-allowed closing-stock-input">
-                        </div>
-                    </div>
+                if (itemName && openingStock && soldQty && closingStock) {
+                    items.push({
+                        itemName,
+                        mrp: parseInt(mrp),
+                        openingStock: parseInt(openingStock),
+                        soldQty: parseInt(soldQty),
+                        closingStock: parseInt(closingStock)
+                    });
+                }
+            });
+
+            const salesData = {
+                ...staticData,
+                items
+            };
+
+            try {
+                const docRef = await addDoc(collection(db, `/artifacts/${appId}/public/data/sales_reports`), salesData);
+                console.log("Document written with ID: ", docRef.id);
+                showMessage("Sales data submitted successfully!");
+                form.reset(); // Reset form after successful submission
+                itemsContainer.innerHTML = ''; // Clear items
+                createItemRow(); // Add a new empty row
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                showMessage("An error occurred while submitting data. Please try again.");
+            }
+        });
+
+        // Function to render the sales data
+        function renderSalesData(dataToRender) {
+            salesDataDisplay.innerHTML = '';
+            if (dataToRender.length === 0) {
+                salesDataDisplay.innerHTML = '<p class="text-center text-gray-500">No matching sales data found.</p>';
+                return;
+            }
+            dataToRender.forEach((data) => {
+                const salesCard = document.createElement('div');
+                salesCard.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow', 'border', 'border-gray-200');
+                salesCard.innerHTML = `
+                    <h3 class="font-bold text-lg text-gray-800 mb-2">${data.employeeName} (${data.storeName})</h3>
+                    <p class="text-sm text-gray-600"><strong>Date:</strong> ${data.date}</p>
+                    <p class="text-sm text-gray-600"><strong>Customer Name:</strong> ${data.customerName}</p>
+                    <p class="text-sm text-gray-600 mb-2"><strong>Location:</strong> ${data.location}</p>
+                    <hr class="my-2">
+                    <h4 class="font-semibold text-gray-700">Items Sold:</h4>
+                    <ul class="list-disc list-inside space-y-1 mt-2">
+                        ${data.items.map(item => `
+                            <li class="text-sm text-gray-600">
+                                <span class="font-medium">${item.itemName}</span> - Sold: ${item.soldQty} |
+                                Closing Stock: ${item.closingStock}
+                            </li>
+                        `).join('')}
+                    </ul>
+                    <p class="text-xs text-right text-gray-400 mt-2">Submitted by: ${data.submittedBy}</p>
                 `;
-                // Manually insert the created select element
-                itemRow.querySelector('div.mt-1').appendChild(itemNameSelect);
-                itemsContainer.appendChild(itemRow);
+                salesDataDisplay.prepend(salesCard);
+            });
+        }
 
-                // Add event listeners to the new row
-                const newSelect = itemRow.querySelector('.item-name-select');
-                const mrpInput = itemRow.querySelector('.mrp-input');
-                const openingStockInput = itemRow.querySelector('.opening-stock-input');
-                const soldQtyInput = itemRow.querySelector('.sold-qty-input');
-                const closingStockInput = itemRow.querySelector('.closing-stock-input');
-                const removeBtn = itemRow.querySelector('.remove-btn');
-
-                newSelect.addEventListener('change', () => {
-                    const selectedProduct = products.find(p => p.name === newSelect.value);
-                    mrpInput.value = selectedProduct ? selectedProduct.mrp : '';
+        // Set up real-time listener for the sales data
+        function setupRealtimeListener() {
+            const q = query(collection(db, `/artifacts/${appId}/public/data/sales_reports`));
+            onSnapshot(q, (querySnapshot) => {
+                loadingDiv.style.display = 'none';
+                allSalesData = [];
+                querySnapshot.forEach((doc) => {
+                    allSalesData.push(doc.data());
                 });
-
-                const calculateClosingStock = () => {
-                    const opening = parseInt(openingStockInput.value) || 0;
-                    const sold = parseInt(soldQtyInput.value) || 0;
-                    const closing = opening - sold;
-                    closingStockInput.value = isNaN(closing) ? '' : closing;
-                };
-
-                openingStockInput.addEventListener('input', calculateClosingStock);
-                soldQtyInput.addEventListener('input', calculateClosingStock);
-                
-                removeBtn.addEventListener('click', () => {
-                    itemsContainer.removeChild(itemRow);
+                // Sort the data in descending order by timestamp
+                allSalesData.sort((a, b) => {
+                    const aTimestamp = a.timestamp ? a.timestamp.toMillis() : 0;
+                    const bTimestamp = b.timestamp ? b.timestamp.toMillis() : 0;
+                    return bTimestamp - aTimestamp;
                 });
+                renderSalesData(allSalesData);
+            }, (error) => {
+                console.error("Error fetching documents: ", error);
+                loadingDiv.textContent = "Error loading data. Check console for details.";
+            });
+        }
+        
+        // Filter functionality
+        filterInput.addEventListener('input', (e) => {
+            const filterText = e.target.value.toLowerCase();
+            const filteredData = allSalesData.filter(data => 
+                data.employeeName.toLowerCase().includes(filterText) || 
+                data.storeName.toLowerCase().includes(filterText)
+            );
+            renderSalesData(filteredData);
+        });
+
+
+        // Handle download button click
+        downloadBtn.addEventListener('click', async () => {
+            if (!userId) {
+                showMessage("Authentication not ready. Please wait a moment and try again.");
+                return;
             }
 
-            // Add a new item row when the button is clicked
-            addItemBtn.addEventListener('click', () => {
-                createItemRow();
-            });
+            try {
+                showMessage("Preparing download...");
+                const q = query(collection(db, `/artifacts/${appId}/public/data/sales_reports`));
+                const querySnapshot = await getDocs(q);
 
-            // Handle form submission to Firestore
-            form.addEventListener('submit', async function(event) {
-                event.preventDefault();
-
-                if (!userId) {
-                    showMessage("Authentication not ready. Please wait a moment and try again.");
+                if (querySnapshot.empty) {
+                    showMessage("No data to download.");
                     return;
                 }
 
-                const staticData = {
-                    date: document.getElementById('date').value,
-                    employeeName: document.getElementById('employeeName').value,
-                    designation: document.getElementById('designation').value,
-                    customerName: document.getElementById('customerName').value,
-                    storeCode: document.getElementById('storeCode').value,
-                    storeName: document.getElementById('storeName').value,
-                    location: document.getElementById('location').value,
-                    submittedBy: userId,
-                    timestamp: new Date()
-                };
+                let csvContent = "Date,Employee Name,Designation,Customer Name,Store Code,Store Name,Location,Item Name,MRP,Opening Stock,Sold Qty,Closing Stock,Submitted By\n";
+                
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const baseData = [
+                        data.date,
+                        `"${data.employeeName}"`,
+                        data.designation,
+                        `"${data.customerName}"`,
+                        data.storeCode,
+                        `"${data.storeName}"`,
+                        `"${data.location}"`,
+                    ].map(field => field.toString().replace(/"/g, '""')).join(',');
 
-                const itemRows = document.querySelectorAll('.item-row');
-                const items = [];
-                itemRows.forEach(row => {
-                    const itemName = row.querySelector('.item-name-select').value;
-                    const mrp = row.querySelector('.mrp-input').value;
-                    const openingStock = row.querySelector('.opening-stock-input').value;
-                    const soldQty = row.querySelector('.sold-qty-input').value;
-                    const closingStock = row.querySelector('.closing-stock-input').value;
-                    
-                    if (itemName && openingStock && soldQty && closingStock) {
-                        items.push({
-                            itemName,
-                            mrp: parseInt(mrp),
-                            openingStock: parseInt(openingStock),
-                            soldQty: parseInt(soldQty),
-                            closingStock: parseInt(closingStock)
+                    if (data.items && Array.isArray(data.items)) {
+                         data.items.forEach(item => {
+                            csvContent += `${baseData},"${item.itemName.toString().replace(/"/g, '""')}",${item.mrp},${item.openingStock},${item.soldQty},${item.closingStock},${data.submittedBy}\n`;
                         });
                     }
                 });
 
-                const salesData = {
-                    ...staticData,
-                    items
-                };
-
-                try {
-                    const docRef = await addDoc(collection(db, `/artifacts/${appId}/public/data/sales_reports`), salesData);
-                    console.log("Document written with ID: ", docRef.id);
-                    showMessage("Sales data submitted successfully!");
-                    form.reset(); // Reset form after successful submission
-                    itemsContainer.innerHTML = ''; // Clear items
-                    createItemRow(); // Add a new empty row
-                } catch (e) {
-                    console.error("Error adding document: ", e);
-                    showMessage("An error occurred while submitting data. Please try again.");
-                }
-            });
-
-            // Function to render the sales data
-            function renderSalesData(dataToRender) {
-                salesDataDisplay.innerHTML = '';
-                if (dataToRender.length === 0) {
-                    salesDataDisplay.innerHTML = '<p class="text-center text-gray-500">No matching sales data found.</p>';
-                    return;
-                }
-                dataToRender.forEach((data) => {
-                    const salesCard = document.createElement('div');
-                    salesCard.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow', 'border', 'border-gray-200');
-                    salesCard.innerHTML = `
-                        <h3 class="font-bold text-lg text-gray-800 mb-2">${data.employeeName} (${data.storeName})</h3>
-                        <p class="text-sm text-gray-600"><strong>Date:</strong> ${data.date}</p>
-                        <p class="text-sm text-gray-600"><strong>Customer Name:</strong> ${data.customerName}</p>
-                        <p class="text-sm text-gray-600 mb-2"><strong>Location:</strong> ${data.location}</p>
-                        <hr class="my-2">
-                        <h4 class="font-semibold text-gray-700">Items Sold:</h4>
-                        <ul class="list-disc list-inside space-y-1 mt-2">
-                            ${data.items.map(item => `
-                                <li class="text-sm text-gray-600">
-                                    <span class="font-medium">${item.itemName}</span> - Sold: ${item.soldQty} |
-                                    Closing Stock: ${item.closingStock}
-                                </li>
-                            `).join('')}
-                        </ul>
-                        <p class="text-xs text-right text-gray-400 mt-2">Submitted by: ${data.submittedBy}</p>
-                    `;
-                    salesDataDisplay.prepend(salesCard);
-                });
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", "sales_data.csv");
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showMessage("Download successful!");
+            } catch (e) {
+                console.error("Error downloading data: ", e);
+                showMessage("An error occurred during download. Please check the console.");
             }
-
-            // Set up real-time listener for the sales data
-            function setupRealtimeListener() {
-                const q = query(collection(db, `/artifacts/${appId}/public/data/sales_reports`));
-                onSnapshot(q, (querySnapshot) => {
-                    loadingDiv.style.display = 'none';
-                    allSalesData = [];
-                    querySnapshot.forEach((doc) => {
-                        allSalesData.push(doc.data());
-                    });
-                    // Sort the data in descending order by timestamp
-                    allSalesData.sort((a, b) => {
-                        const aTimestamp = a.timestamp ? a.timestamp.toMillis() : 0;
-                        const bTimestamp = b.timestamp ? b.timestamp.toMillis() : 0;
-                        return bTimestamp - aTimestamp;
-                    });
-                    renderSalesData(allSalesData);
-                }, (error) => {
-                    console.error("Error fetching documents: ", error);
-                    loadingDiv.textContent = "Error loading data. Check console for details.";
-                });
-            }
-            
-            // Filter functionality
-            filterInput.addEventListener('input', (e) => {
-                const filterText = e.target.value.toLowerCase();
-                const filteredData = allSalesData.filter(data => 
-                    data.employeeName.toLowerCase().includes(filterText) || 
-                    data.storeName.toLowerCase().includes(filterText)
-                );
-                renderSalesData(filteredData);
-            });
-
-
-            // Handle download button click
-            downloadBtn.addEventListener('click', async () => {
-                if (!userId) {
-                    showMessage("Authentication not ready. Please wait a moment and try again.");
-                    return;
-                }
-
-                try {
-                    showMessage("Preparing download...");
-                    const q = query(collection(db, `/artifacts/${appId}/public/data/sales_reports`));
-                    const querySnapshot = await getDocs(q);
-
-                    if (querySnapshot.empty) {
-                        showMessage("No data to download.");
-                        return;
-                    }
-
-                    let csvContent = "Date,Employee Name,Designation,Customer Name,Store Code,Store Name,Location,Item Name,MRP,Opening Stock,Sold Qty,Closing Stock,Submitted By\n";
-                    
-                    querySnapshot.forEach((doc) => {
-                        const data = doc.data();
-                        const baseData = [
-                            data.date,
-                            `"${data.employeeName}"`,
-                            data.designation,
-                            `"${data.customerName}"`,
-                            data.storeCode,
-                            `"${data.storeName}"`,
-                            `"${data.location}"`,
-                        ].map(field => field.toString().replace(/"/g, '""')).join(',');
-
-                        if (data.items && Array.isArray(data.items)) {
-                             data.items.forEach(item => {
-                                csvContent += `${baseData},"${item.itemName.toString().replace(/"/g, '""')}",${item.mrp},${item.openingStock},${item.soldQty},${item.closingStock},${data.submittedBy}\n`;
-                            });
-                        }
-                    });
-
-                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                    const link = document.createElement("a");
-                    const url = URL.createObjectURL(blob);
-                    link.setAttribute("href", url);
-                    link.setAttribute("download", "sales_data.csv");
-                    link.style.visibility = 'hidden';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    showMessage("Download successful!");
-                } catch (e) {
-                    console.error("Error downloading data: ", e);
-                    showMessage("An error occurred during download. Please check the console.");
-                }
-            });
-            
-            // --- Core App Initialization Logic ---
-            // 1. Authenticate the user. The onAuthStateChanged listener will handle
-            //    setting the user ID and starting the data listener.
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    // User is signed in.
-                    userId = user.uid;
-                    userIdDisplay.textContent = `Your User ID: ${userId}`;
-                    // Now that we have a user, start the real-time data listener
-                    setupRealtimeListener();
-                } else {
-                    // User is signed out, or a new user needs to be authenticated.
-                    try {
-                        if (initialAuthToken) {
-                            await signInWithCustomToken(auth, initialAuthToken);
-                        } else {
-                            await signInAnonymously(auth);
-                        }
-                    } catch (error) {
-                        console.error("Authentication failed: ", error);
-                        showMessage("Authentication failed. Check the console for more details.");
-                    }
-                }
-            });
-
-            // 2. Immediately render the first item row. This part of the form
-            //    doesn't depend on the database, so it should appear instantly.
-            createItemRow();
         });
+        
+        // --- Core App Initialization Logic ---
+        // 1. Authenticate the user. The onAuthStateChanged listener will handle
+        //    setting the user ID and starting the data listener.
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // User is signed in.
+                userId = user.uid;
+                userIdDisplay.textContent = `Your User ID: ${userId}`;
+                // Now that we have a user, start the real-time data listener
+                setupRealtimeListener();
+            } else {
+                // User is signed out, or a new user needs to be authenticated.
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Authentication failed: ", error);
+                    showMessage("Authentication failed. Check the console for more details.");
+                }
+            }
+        });
+
+        // 2. Immediately render the first item row. This part of the form
+        //    doesn't depend on the database, so it should appear instantly.
+        createItemRow();
     </script>
 </body>
 </html>
