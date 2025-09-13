@@ -474,15 +474,15 @@
         });
         
         // --- Core App Initialization Logic ---
-        // 1. Authenticate the user. The onAuthStateChanged listener will handle
-        //    setting the user ID and starting the data listener.
+        // We tie UI initialization to a successful authentication, ensuring the DOM is ready.
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 // User is signed in.
                 userId = user.uid;
                 userIdDisplay.textContent = `Your User ID: ${userId}`;
-                // Now that we have a user, start the real-time data listener
+                // Now that we have a user, start the real-time data listener and create the form row
                 setupRealtimeListener();
+                createItemRow();
             } else {
                 // User is signed out, or a new user needs to be authenticated.
                 try {
@@ -497,10 +497,6 @@
                 }
             }
         });
-
-        // 2. Immediately render the first item row. This part of the form
-        //    doesn't depend on the database, so it should appear instantly.
-        createItemRow();
     </script>
 </body>
 </html>
