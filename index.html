@@ -126,11 +126,6 @@
         <p id="messageText" class="text-gray-700 mb-4"></p>
         <button id="messageCloseBtn" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">OK</button>
     </div>
-    
-    <!-- DataList for Products - Placed globally for reusability -->
-    <datalist id="product-names">
-        <!-- Options will be added by JavaScript -->
-    </datalist>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -201,7 +196,6 @@
         const messageText = document.getElementById('messageText');
         const messageCloseBtn = document.getElementById('messageCloseBtn');
         const filterInput = document.getElementById('filterInput');
-        const productDatalist = document.getElementById('product-names');
 
         let userId = null;
         let allSalesData = [];
@@ -215,15 +209,6 @@
         messageCloseBtn.addEventListener('click', () => {
             messageBox.style.display = 'none';
         });
-        
-        // Populate the datalist once on load
-        function populateDatalist() {
-            products.forEach(p => {
-                const option = document.createElement('option');
-                option.value = p.name;
-                productDatalist.appendChild(option);
-            });
-        }
 
         function createItemRow() {
             // Create the main item row container
@@ -245,21 +230,31 @@
             const mainGrid = document.createElement('div');
             mainGrid.classList.add('grid', 'grid-cols-1', 'md:grid-cols-2', 'gap-4');
             
-            // Item Name datalist container
+            // Item Name dropdown container
             const itemNameDiv = document.createElement('div');
             const itemNameLabel = document.createElement('label');
             itemNameLabel.textContent = 'Item Name';
             itemNameLabel.classList.add('block', 'text-sm', 'font-medium', 'text-gray-700');
             
-            const itemNameInput = document.createElement('input');
-            itemNameInput.type = 'text';
-            itemNameInput.name = 'itemName';
-            itemNameInput.required = true;
-            itemNameInput.setAttribute('list', 'product-names');
-            itemNameInput.classList.add('mt-1', 'block', 'w-full', 'px-4', 'py-2', 'bg-white', 'border', 'border-gray-300', 'rounded-lg', 'shadow-sm', 'focus:outline-none', 'focus:ring-indigo-500', 'focus:border-indigo-500', 'item-name-input');
+            const itemNameSelect = document.createElement('select');
+            itemNameSelect.name = 'itemName';
+            itemNameSelect.required = true;
+            itemNameSelect.classList.add('mt-1', 'block', 'w-full', 'px-4', 'py-2', 'bg-white', 'border', 'border-gray-300', 'rounded-lg', 'shadow-sm', 'focus:outline-none', 'focus:ring-indigo-500', 'focus:border-indigo-500', 'item-name-select');
+            
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Select a Product';
+            itemNameSelect.appendChild(defaultOption);
+
+            products.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.name;
+                option.textContent = p.name;
+                itemNameSelect.appendChild(option);
+            });
             
             itemNameDiv.appendChild(itemNameLabel);
-            itemNameDiv.appendChild(itemNameInput);
+            itemNameDiv.appendChild(itemNameSelect);
             mainGrid.appendChild(itemNameDiv);
 
             // MRP input container
@@ -295,20 +290,44 @@
             openingDiv.appendChild(openingLabel);
             openingDiv.appendChild(openingInput);
             stockGrid.appendChild(openingDiv);
-
-            // Sold Qty
+            
+            // Sold Qty dropdown
             const soldDiv = document.createElement('div');
             const soldLabel = document.createElement('label');
             soldLabel.textContent = 'Sold Qty';
             soldLabel.classList.add('block', 'text-sm', 'font-medium', 'text-gray-700');
-            const soldInput = document.createElement('input');
-            soldInput.type = 'number';
-            soldInput.name = 'soldQty';
-            soldInput.required = true;
-            soldInput.classList.add('mt-1', 'block', 'w-full', 'px-4', 'py-2', 'bg-white', 'border', 'border-gray-300', 'rounded-lg', 'shadow-sm', 'focus:outline-none', 'focus:ring-indigo-500', 'focus:border-indigo-500', 'sold-qty-input');
+
+            const soldSelect = document.createElement('select');
+            soldSelect.name = 'soldQty';
+            soldSelect.required = true;
+            soldSelect.classList.add('mt-1', 'block', 'w-full', 'px-4', 'py-2', 'bg-white', 'border', 'border-gray-300', 'rounded-lg', 'shadow-sm', 'focus:outline-none', 'focus:ring-indigo-500', 'focus:border-indigo-500', 'sold-qty-select');
+
+            const soldDefaultOption = document.createElement('option');
+            soldDefaultOption.value = '';
+            soldDefaultOption.textContent = 'Select Quantity';
+            soldSelect.appendChild(soldDefaultOption);
+
+            for (let i = 1; i <= 10; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                soldSelect.appendChild(option);
+            }
+            const soldOtherOption = document.createElement('option');
+            soldOtherOption.value = 'Other';
+            soldOtherOption.textContent = 'Other';
+            soldSelect.appendChild(soldOtherOption);
+
             soldDiv.appendChild(soldLabel);
-            soldDiv.appendChild(soldInput);
+            soldDiv.appendChild(soldSelect);
             stockGrid.appendChild(soldDiv);
+
+            // Sold Qty manual input (hidden by default)
+            const soldManualInput = document.createElement('input');
+            soldManualInput.type = 'number';
+            soldManualInput.placeholder = 'Enter quantity';
+            soldManualInput.classList.add('mt-1', 'block', 'w-full', 'px-4', 'py-2', 'bg-white', 'border', 'border-gray-300', 'rounded-lg', 'shadow-sm', 'focus:outline-none', 'focus:ring-indigo-500', 'focus:border-indigo-500', 'sold-manual-input', 'hidden');
+            soldDiv.appendChild(soldManualInput);
 
             // Closing Stock
             const closingDiv = document.createElement('div');
@@ -327,21 +346,39 @@
             itemRow.appendChild(stockGrid);
             itemsContainer.appendChild(itemRow);
 
-            // Add event listeners
-            itemNameInput.addEventListener('change', () => {
-                const selectedProduct = products.find(p => p.name === itemNameInput.value);
+            // Event Listeners for the new elements
+            itemNameSelect.addEventListener('change', () => {
+                const selectedProduct = products.find(p => p.name === itemNameSelect.value);
                 mrpInput.value = selectedProduct ? selectedProduct.mrp : '';
+            });
+
+            soldSelect.addEventListener('change', () => {
+                if (soldSelect.value === 'Other') {
+                    soldManualInput.classList.remove('hidden');
+                    soldManualInput.required = true;
+                    soldManualInput.focus();
+                } else {
+                    soldManualInput.classList.add('hidden');
+                    soldManualInput.required = false;
+                    calculateClosingStock();
+                }
             });
 
             const calculateClosingStock = () => {
                 const opening = parseInt(openingInput.value) || 0;
-                const sold = parseInt(soldInput.value) || 0;
+                let sold = 0;
+                if (soldSelect.value === 'Other') {
+                    sold = parseInt(soldManualInput.value) || 0;
+                } else {
+                    sold = parseInt(soldSelect.value) || 0;
+                }
                 const closing = opening - sold;
                 closingInput.value = isNaN(closing) ? '' : closing;
             };
 
             openingInput.addEventListener('input', calculateClosingStock);
-            soldInput.addEventListener('input', calculateClosingStock);
+            soldSelect.addEventListener('change', calculateClosingStock);
+            soldManualInput.addEventListener('input', calculateClosingStock);
             
             removeBtn.addEventListener('click', () => {
                 itemsContainer.removeChild(itemRow);
@@ -365,10 +402,16 @@
             const itemRows = document.querySelectorAll('.item-row');
             const items = [];
             itemRows.forEach(row => {
-                const itemName = row.querySelector('.item-name-input').value;
+                const itemName = row.querySelector('.item-name-select').value;
                 const mrp = row.querySelector('.mrp-input').value;
                 const openingStock = row.querySelector('.opening-stock-input').value;
-                const soldQty = row.querySelector('.sold-qty-input').value;
+                const soldQtySelect = row.querySelector('.sold-qty-select').value;
+                let soldQty = 0;
+                if (soldQtySelect === 'Other') {
+                    soldQty = row.querySelector('.sold-manual-input').value;
+                } else {
+                    soldQty = soldQtySelect;
+                }
                 const closingStock = row.querySelector('.closing-stock-input').value;
                 
                 if (itemName && openingStock && soldQty && closingStock) {
@@ -550,11 +593,8 @@
             }
         });
 
-        // Initially create one item row and populate the datalist
-        window.onload = function() {
-            populateDatalist();
-            createItemRow();
-        };
+        // Initially create one item row
+        window.onload = createItemRow;
     </script>
 </body>
 </html>
