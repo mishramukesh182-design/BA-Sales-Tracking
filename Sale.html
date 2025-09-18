@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sale Tracking Form</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="text"],
+        input[type="date"],
+        input[type="file"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        input[type="file"] {
+            border: none;
+            padding: 0;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Sale Tracking Form</h1>
+    <form action="#" method="post" enctype="multipart/form-data">
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="date">Date</label>
+                <input type="date" id="date" name="date" required>
+            </div>
+            <div class="form-group">
+                <label for="employeeName">Employee Name</label>
+                <input type="text" id="employeeName" name="employeeName" required>
+            </div>
+            <div class="form-group">
+                <label for="employeeDesignation">Employee Designation</label>
+                <input type="text" id="employeeDesignation" name="employeeDesignation" required>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="chainName">Chain Name</label>
+                <input type="text" id="chainName" name="chainName">
+            </div>
+            <div class="form-group">
+                <label for="visitedStoreName">Visited Store Name with Code</label>
+                <input type="text" id="visitedStoreName" name="visitedStoreName">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="uploadStoreImage">Upload Store Image</label>
+            <input type="file" id="uploadStoreImage" name="uploadStoreImage">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="cityLocation">City/Location</label>
+                <input type="text" id="cityLocation" name="cityLocation">
+            </div>
+            <div class="form-group">
+                <label for="areaList">Area List</label>
+                <input type="text" id="areaList" name="areaList">
+            </div>
+        </div>
+
+        <h3>Stock and Sales Information</h3>
+        <hr>
+
+        <div class="grid-container">
+            <div class="form-group">
+                <label for="mrp">MRP</label>
+                <input type="text" id="mrp" name="mrp">
+            </div>
+            <div class="form-group">
+                <label for="openingStock">Opening Stock</label>
+                <input type="text" id="openingStock" name="openingStock">
+            </div>
+            <div class="form-group">
+                <label for="sales">Sales</label>
+                <input type="text" id="sales" name="sales">
+            </div>
+            <div class="form-group">
+                <label for="closingStock">Closing Stock</label>
+                <input type="text" id="closingStock" name="closingStock">
+            </div>
+            <div class="form-group">
+                <label for="stockRetailer">Stock (Retailer)</label>
+                <input type="text" id="stockRetailer" name="stockRetailer">
+            </div>
+            <div class="form-group">
+                <label for="stockCity">Stock (City)</label>
+                <input type="text" id="stockCity" name="stockCity">
+            </div>
+        </div>
+
+        <button type="submit">Submit Form</button>
+    </form>
+</div>
+
+</body>
+</html>
